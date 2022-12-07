@@ -1,0 +1,98 @@
+﻿<Window x:Class="SteganographyNetCore.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SteganographyNetCore"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="930" Width="1600"
+        d:DataContext="{d:DesignInstance local:MainWindowVm}">
+    <Window.Resources>
+        <ControlTemplate x:Key="TextBoxTemplate" TargetType="{x:Type TextBox}">
+            <Border x:Name="border" 
+                    BorderBrush="{TemplateBinding BorderBrush}" 
+                    BorderThickness="{TemplateBinding BorderThickness}" 
+                    Background="{TemplateBinding Background}" 
+                    SnapsToDevicePixels="True"
+                    AllowDrop="True">
+                <Grid>
+                    <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+
+                    <TextBlock x:Name="InternalWatermarkLabel" 
+                               Text="{TemplateBinding Tag}" 
+                               Visibility="Collapsed" Focusable="False"
+                               VerticalAlignment="Top" Margin=" 5 1 0 0"
+                               Foreground="Silver"
+                               Background="Transparent"
+                               TextWrapping="Wrap"/>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsFocused" Value="False" />
+                        <Condition Property="Text" Value="" />
+                    </MultiTrigger.Conditions>
+                    <MultiTrigger.Setters>
+                        <Setter Property="Visibility" TargetName="InternalWatermarkLabel"
+                                Value="Visible" />
+                    </MultiTrigger.Setters>
+                </MultiTrigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" TargetName="border" Value="0.56"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF7EB4EA"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF569DE5"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <local:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Border Grid.Row="0"
+                Grid.Column="0"
+                Background="LightGray"
+                BorderThickness="1"
+                AllowDrop="True"
+                Drop="OnDrop">
+            <Grid>
+                <Image Margin="10,10,10,10" 
+                       Source="{Binding SourceImage}"/>
+                <TextBlock Text="Перетащите изображение сюда"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Visibility="{Binding SourceImage, Converter={StaticResource NotNullToVisibilityConverter}}"/>
+            </Grid>
+        </Border>
+        <TextBox Grid.Column="1"
+                 Template="{StaticResource TextBoxTemplate}"
+                 Tag="Введите текст, который хотите зашифровать в картинку"
+                 TextWrapping="Wrap"
+                 FontSize="22"
+                 IsEnabled="True"
+                 Margin="10, 10, 10, 190"
+                 Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <Button Grid.Column="1"
+                Height="80"
+                VerticalAlignment="Bottom"
+                Margin="10"
+                Content="Зашифровать"
+                Command="{Binding EncryptCommand}"
+                FontSize="20"/>
+        <Button Grid.Column="1"
+                Height="80"
+                VerticalAlignment="Bottom"
+                Margin="10,10,10,100"
+                Content="Дешифровать"
+                Command="{Binding DecryptCommand}"
+                FontSize="20"/>
+    </Grid>
+</Window>
